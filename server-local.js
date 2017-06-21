@@ -1,6 +1,8 @@
 /*
  * Purely for local development purposes, as the redirect URI must be HTTPS
  */
+require('dotenv').config();
+
 var https = require('https');
 var selfSigned = require('openssl-self-signed-certificate');
 

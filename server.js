@@ -19,6 +19,7 @@ var cookieName = "application-data-api-demo",
     secure: process.env.NODE_ENV === 'production'
 };
 
+require('ejs');  // to trigger 'serverless-plugin-include-dependencies'
 app.set('view engine', 'ejs');
 app.enable('trust proxy');
 app.use(cookieParser());
@@ -99,3 +100,4 @@ app.listen(port);
 console.log(`HTTP started on port ${port}.`);
 
 module.exports = app;
+module.exports.handler = require('serverless-http')(app);

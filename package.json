@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "gulp dev",
     "start": "node server.js",
-    "test": "jshint ."
+    "test": "jshint . && serverless deploy --noDeploy",
+    "serverless": "serverless",
+    "sls": "serverless"
   },
   "repository": {
     "type": "git",
@@ -19,18 +21,21 @@
   },
   "homepage": "https://github.com/Brightspace/application-data-api-demo#readme",
   "devDependencies": {
+    "dotenv": "^4.0.0",
     "gulp": "^3.9.1",
     "gulp-cli": "^1.2.1",
-    "gulp-env": "^0.4.0",
     "gulp-nodemon": "^2.1.0",
     "jshint": "^2.9.2",
-    "openssl-self-signed-certificate": "^1.1.4"
+    "openssl-self-signed-certificate": "^1.1.4",
+    "serverless": "1.15.3",
+    "serverless-plugin-include-dependencies": "^2.1.2"
   },
   "dependencies": {
     "body-parser": "^1.15.2",
     "cookie-parser": "^1.4.3",
     "ejs": "^2.4.2",
     "express": "^4.14.0",
+    "serverless-http": "^1.4.3",
     "superagent": "^2.0.0"
   }
 }

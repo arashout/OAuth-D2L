@@ -23,14 +23,12 @@ These environment variables must be set:
 * HOST_URL
   * The URL of the Brightspace instance (e.g. `https://myschool.brightspace.com`)
 
-A file named `.devenv.json` with the following structure can be used to automatically set environment variables:
+A file named `.env` with the following structure can be used to automatically set environment variables:
 
-```js
-{
-    "CLIENT_ID": "<client_id>",
-    "CLIENT_SECRET": "<client_secret>",
-    "HOST_URL": "<host_url>"
-}
+```
+CLIENT_ID=<client_id>
+CLIENT_SECRET=<client_secret>
+HOST_URL=<host_url>
 ```
 
 ### Running the sample

@@ -1,0 +1,39 @@
+service: oauth-client-example
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  region: ${opt:region, env:AWS_DEFAULT_REGION, self:custom.defaultRegion}
+
+custom:
+  defaultRegion: us-west-2
+  
+plugins:
+  - serverless-plugin-include-dependencies
+
+package:
+  exclude:
+    - .*
+    - gulpfile.js
+    - npm-debug*
+    - package.json
+    - README.md
+    - server-local.js
+
+functions:
+  server:
+    handler: server.handler
+    events:
+      - http:
+          integration: lambda-proxy
+          path: /
+          method: ANY
+      - http:
+          integration: lambda-proxy
+          path: /{any+}
+          method: ANY
+    environment:
+        CLIENT_ID: ${file(configs.js):config.clientId}
+        CLIENT_SECRET: ${file(configs.js):config.clientSecret}
+        AUTH_SITE: ${file(configs.js):config.authSite}
+        HOST_URL: ${file(configs.js):config.hostUrl}
