@@ -31,7 +31,7 @@
     "cookie-parser": "^1.4.3",
     "ejs": "^2.4.2",
     "express": "^4.14.0",
-    "json2csv": "^3.7.3",
+    "jsonexport": "^2.0.10",
     "superagent": "^2.0.0"
   }
 }

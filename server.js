@@ -3,7 +3,7 @@ var express = require('express'),
     app = express(),
     bodyParser = require('body-parser'),
     cookieParser = require('cookie-parser'),
-    json2csv = require('json2csv'),
+    jsonexport = require('jsonexport'),
     fs = require('fs');
 
 var querystring = require('querystring');
@@ -101,17 +101,22 @@ app.get('/data', function (req, res) {
                 var locals = { data: JSON.stringify(parsedJsonResponse, null, 2) };
                 // Try to convert json response to csv - if successful, save as CSV
                 try {
-                    let csvText = json2csv({ data: parsedJsonResponse });
-
-                    fs.writeFile(csvName, csvText, function (err) {
-                        if (err) {
-                            return console.log(err);
-                        }
-                        else if (parsedJsonResponse === '{}') {
-                            return console.log('Empty JSON response')
-                        }
-                        console.log("The file was saved!");
+                    console.log(parsedJsonResponse);
+                    jsonexport(parsedJsonResponse, function (err, csvText) {
+                        if (err) return console.log(err);
+                        
+                        fs.writeFile(csvName, csvText, function (err) {
+                            if (err) {
+                                return console.log(err);
+                            }
+                            else if (parsedJsonResponse === '{}') {
+                                return console.log('Empty JSON response')
+                            }
+                            console.log("The file was saved!");
+                        });
                     });
+
+
                 }
                 catch (err) {
                     console.log(err);
