@@ -2,6 +2,8 @@ var express = require('express'),
     app = express(),
     bodyParser = require('body-parser'),
     cookieParser = require('cookie-parser');
+json2csv = require('json2csv');
+fs = require('fs');
 
 var querystring = require('querystring');
 var request = require('superagent');
@@ -11,24 +13,24 @@ var port = process.env.PORT || 3000;
 var authService = process.env.AUTH_SITE || "https://auth.brightspace.com";
 var authCodeEndpoint = authService + "/oauth2/auth";
 var tokenEndpoint = authService + "/core/connect/token";
-var getRedirectUri = function(req) { return req.protocol + "://" + req.headers.host + "/callback"; };
+var getRedirectUri = function (req) { return req.protocol + "://" + req.headers.host + "/callback"; };
 
 var cookieName = "application-data-api-demo",
     cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production'
-};
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production'
+    };
 
 app.set('view engine', 'ejs');
 app.enable('trust proxy');
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get('/', function(req, res) {
+app.get('/', function (req, res) {
     res.render('index');
 });
 
-app.get('/auth', function(req, res) {
+app.get('/auth', function (req, res) {
     // Authorization Request: https://tools.ietf.org/html/rfc6749#section-4.1.1
     var authCodeParams = querystring.stringify({
         response_type: "code",
@@ -42,7 +44,7 @@ app.get('/auth', function(req, res) {
     res.redirect(authCodeEndpoint + "?" + authCodeParams);
 });
 
-app.get('/callback', function(req, res) {
+app.get('/callback', function (req, res) {
     // Authorization Response: https://tools.ietf.org/html/rfc6749#section-4.1.2
     // Validate req.query.state before continuing in production to prevent CSRF (https://tools.ietf.org/html/rfc6749#section-10.12)
     var authorizationCode = req.query.code;
@@ -53,7 +55,6 @@ app.get('/callback', function(req, res) {
         redirect_uri: getRedirectUri(req),
         code: authorizationCode
     };
-
     request
         .post(tokenEndpoint)
         // Authenticate via HTTP Basic authentication scheme: https://tools.ietf.org/html/rfc6749#section-2.3.1
@@ -61,7 +62,7 @@ app.get('/callback', function(req, res) {
         // Using application/x-www-form-urlencoded as per https://tools.ietf.org/html/rfc6749#section-4.1.3
         .type('form')
         .send(payload)
-        .end(function(err, postResponse) {
+        .end(function (err, postResponse) {
             if (err) {
                 console.log('Access Token Error', err.response || err);
                 res.redirect('/');
@@ -77,19 +78,43 @@ app.get('/callback', function(req, res) {
         });
 });
 
-app.get('/data', function(req, res) {
+app.get('/data', function (req, res) {
     var access_token = req.cookies[cookieName].accessToken;
-
+    let baseRoute = '/d2l/api/lp/';
+    let version = '1.13';
+    let apiCommand = '/users/';
+    let queryParameters = {}; //Add query commands here
+    let csvName = 'csvFile.csv';
+    
     request
-        .get(process.env.HOST_URL + '/d2l/api/lp/1.10/users/whoami')
+        .get(process.env.HOST_URL + baseRoute + version + apiCommand)
+        .query(queryParameters)
         .set('Authorization', `Bearer ${access_token}`)
-        .end(function(error, response) {
+        .end(function (error, response) {
             if (error) {
                 var errorMessage = JSON.stringify(error, null, 2);
                 console.log(errorMessage);
                 res.send(`<pre>${errorMessage}</pre>`);
             } else {
-                var locals = { data: JSON.stringify(JSON.parse(response.text || '{}'), null, 2) };
+                let parsedJsonResponse = JSON.parse(response.text || '{}');
+                var locals = { data: JSON.stringify(parsedJsonResponse, null, 2) };
+                // Try to convert json response to csv - if successful, save as CSV
+                try {
+                    let csvText = json2csv({ data: parsedJsonResponse });
+
+                    fs.writeFile(csvName, csvText, function (err) {
+                        if (err) {
+                            return console.log(err);
+                        }
+                        else if (parsedJsonResponse === '{}') {
+                            return console.log('Empty JSON response')
+                        }
+                        console.log("The file was saved!");
+                    });
+                }
+                catch (err) {
+                    console.log(err);
+                }
                 res.render('data', locals);
             }
         });
