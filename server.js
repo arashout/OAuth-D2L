@@ -97,12 +97,14 @@ app.get('/data', function (req, res) {
                 console.log(errorMessage);
                 res.send(`<pre>${errorMessage}</pre>`);
             } else {
+                // Might to select root items from this dictionary
                 let parsedJsonResponse = JSON.parse(response.text || '{}');
                 var locals = { data: JSON.stringify(parsedJsonResponse, null, 2) };
                 // Try to convert json response to csv - if successful, save as CSV
                 try {
-                    console.log(parsedJsonResponse);
-                    jsonexport(parsedJsonResponse, function (err, csvText) {
+                    // Make the object in csvJSONList is the root list?
+                    let csvJSONList = parsedJsonResponse['Items'];
+                    jsonexport(csvJSONList, function (err, csvText) {
                         if (err) return console.log(err);
                         
                         fs.writeFile(csvName, csvText, function (err) {
