@@ -1,9 +1,10 @@
+'use strict';
 var express = require('express'),
     app = express(),
     bodyParser = require('body-parser'),
-    cookieParser = require('cookie-parser');
-json2csv = require('json2csv');
-fs = require('fs');
+    cookieParser = require('cookie-parser'),
+    json2csv = require('json2csv'),
+    fs = require('fs');
 
 var querystring = require('querystring');
 var request = require('superagent');
@@ -85,7 +86,7 @@ app.get('/data', function (req, res) {
     let apiCommand = '/users/';
     let queryParameters = {}; //Add query commands here
     let csvName = 'csvFile.csv';
-    
+
     request
         .get(process.env.HOST_URL + baseRoute + version + apiCommand)
         .query(queryParameters)
